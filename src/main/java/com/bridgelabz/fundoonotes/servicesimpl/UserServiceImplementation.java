@@ -125,6 +125,12 @@ public class UserServiceImplementation implements UserServices {
 
 	}
 
+	/**
+	 * if user is not verify then it's will send a link to to verify	
+	 * @param PasswordUpdate information and token
+	 * @return true and false
+	 * 
+	 */
 	@Transactional
 	@Override
 	public boolean update(PasswordUpdate information, String token) {
