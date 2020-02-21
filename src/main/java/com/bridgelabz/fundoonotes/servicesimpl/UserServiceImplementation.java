@@ -50,7 +50,13 @@ public class UserServiceImplementation implements UserServices {
 	@Autowired
 	private RabbitMQSender rabbitMQSender;
 
-	
+	/**
+	 * This is for Storing the informing of the user in data
+	 * @param user information
+	 * @return it's return true and false 
+	 * if user get registered then it's responsible for saving the data in data 
+	 * 
+	 */
 
 	@Transactional
 	@Override
@@ -59,35 +65,43 @@ public class UserServiceImplementation implements UserServices {
 		UserInformation user = repository.getUser(information.getEmail());
 
 		if (user == null) {
-
 			userInformation = modelMapper.map(information, UserInformation.class);
 			userInformation.setCreatedDate(LocalDateTime.now());
 			String epassword = encryption.encode(information.getPassword());
+			// setting the some extra information and encrypting the password 
 			userInformation.setPassword(epassword);
 			userInformation.setVerified(false);
+			// calling the save method
 			userInformation = repository.save(userInformation);
 			System.out.println("id" + " " + userInformation.getUserId());
 			System.out.println("token" + " " + generate.jwtToken(userInformation.getUserId()));
-			String mailResponse = response.formMessage("http://localhost:8080/verify",
-					generate.jwtToken(userInformation.getUserId()));
+			String mailResponse = response.formMessage("http://localhost:8080/user/verify", generate.jwtToken(userInformation.getUserId()));
+			// setting the data to mail
 			System.out.println(mailResponse);
 			mailObject.setEmail(information.getEmail());
 			mailObject.setMessage(mailResponse);
-			mailObject.setSubject("verification");
-
+			mailObject.setSubject("Verification");
 			rabbitMQSender.send(mailObject);
 			return true;
-
 		} else {
 			throw new UserException("user already exist with the same mail id");
 
 		}
 
 	}
+	
+	/**
+	 * This is responsible to handle the login if user is verify then only user can login 
+	 * if user is not verify then it's will send a link to to verify	
+	 * @param Login information
+	 * @return null
+	 * 
+	 */
 
 	@Transactional
 	@Override
 	public UserInformation login(LoginInformation information) {
+		// Checking user is available or not with this email id
 		UserInformation user = repository.getUser(information.getEmail());
 		System.out.println("inside service " + user);
 		if (user != null) {
@@ -96,7 +110,7 @@ public class UserServiceImplementation implements UserServices {
 				System.out.println(generate.jwtToken(user.getUserId()));
 				return user;
 			} else {
-				String mailResponse = response.formMessage("http://localhost:3000/verify",
+				String mailResponse = response.formMessage("http://localhost:8080/verify",
 						generate.jwtToken(user.getUserId()));
 
 				MailServiceProvider.sendEmail(information.getEmail(), "verification", mailResponse);
@@ -154,7 +168,7 @@ public class UserServiceImplementation implements UserServices {
 		try {
 			UserInformation user = repository.getUser(email);
 			if (user.isVerified() == true) {
-				String mailResponse = response.formMessage("http://localhost:3000/updatePassword",
+				String mailResponse = response.formMessage("http://localhost:8080/updatePassword",
 						generate.jwtToken(user.getUserId()));
 				MailServiceProvider.sendEmail(user.getEmail(), "verification", mailResponse);
 				return true;

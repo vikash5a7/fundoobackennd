@@ -17,7 +17,6 @@ public interface LabelService {
 	
 	void addLabel(Long labelId, Long noteId, String token);
 	
-//	List<LabelInformation> getLabel(Long userId);
 	
 	List<LabelInformation> getLabel(String token);
 	

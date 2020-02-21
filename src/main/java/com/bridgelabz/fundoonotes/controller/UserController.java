@@ -42,6 +42,12 @@ public class UserController {
 	@Autowired
 	private JwtGenerator generate;
 	
+	/**
+	 * This is used for Registration purpose
+	 * @param information of the user
+	 * @return Response as success or fail
+	 */
+	
 	@PostMapping("/user/registration")
 	@CachePut(value="user", key="#token")
 	@ResponseBody
@@ -59,11 +65,15 @@ public class UserController {
 		}
 
 	}
+	/**
+	 * This is used for the login the user based on there credentials
+	 * @param loging information (user email and password)
+	 * @return response and the token
+	 */
 
 	@PostMapping("/user/login")
 	public ResponseEntity<UsersDetail> login(@RequestBody LoginInformation information) {
-		System.out.println(information.getPassword());
-		System.out.println(information.getEmail());
+		// sending to login.....
 		UserInformation userInformation = service.login(information);
 		System.out.println("inside login controler");
 		if (userInformation!=null) {
@@ -77,6 +87,12 @@ public class UserController {
 		}
 
 	}
+	/**
+	 * This is for the user verify.......
+	 * @param token
+	 * @return response as success and fail
+	 * @throws Exception
+	 */
 
 	@GetMapping("/user/verify/{token}")
 	public ResponseEntity<Response> userVerification(@PathVariable("token") String token) throws Exception {
@@ -89,8 +105,12 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new Response("not verified", 400));
 
 		}
-
 	}
+	/**
+	 * This is used for forgetting password
+	 * @param email
+	 * @return response exit or not 
+	 */
 
 	@PostMapping("user/forgotpassword")
 	public ResponseEntity<Response> forgogPassword(@RequestParam("email") String email) {
@@ -104,6 +124,11 @@ public class UserController {
 		}
 
 	}
+	/**
+	 * This is used for forgetting password
+	 * @param email
+	 * @return response exit or not 
+	 */
 
 	@PutMapping("user/update/{token}")
 	public ResponseEntity<Response> update(@PathVariable("token") String token, @RequestBody PasswordUpdate update) {
@@ -116,11 +141,15 @@ public class UserController {
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(new Response("password doesn't match", 401));
-
 		}
 
 	}
 	
+	/**
+	 * This is for the users from the database
+	 * @return response
+	 * @param nothing
+	 */
 	@GetMapping("user/getusers")
 	@Cacheable(value="users")
 	public ResponseEntity<Response> getUsers(){
@@ -130,6 +159,11 @@ public class UserController {
 				.body(new Response("The user's are", 200, users));
 		
 	}
+	/**
+	 * This is used for the get one user based on there token 
+	 * @param token
+	 * @return response
+	 */
 	
 	@GetMapping("user/getOneUser")
 	public ResponseEntity<Response> getOneUsers(@RequestHeader("token") String token){

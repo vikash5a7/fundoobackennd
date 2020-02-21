@@ -3,7 +3,6 @@ package com.bridgelabz.fundoonotes.repositoryimpl;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -19,26 +18,42 @@ public class UserRepositoryImplementation implements IUserRepository {
 
 	@Autowired
 	private EntityManager entityManager;
+	
 
+	/**
+	 *  This is for saving the data in database
+	 *  @param All the user information
+	 *  @return {@link UserInformation}
+	 */
 	@Override
 	public UserInformation save(UserInformation userInformation) {
-
 		Session session = entityManager.unwrap(Session.class);
 		session.saveOrUpdate(userInformation);
 		return userInformation;
 
 	}
+	/**
+	 * Getting data from the database based on there email
+	 * @param email
+	 * @return unique result of users details 
+	 */
 
 	@Override
 	public UserInformation getUser(String email) {
 		
 		Session session = entityManager.unwrap(Session.class);
+		@SuppressWarnings("rawtypes")
 		Query q = session.createQuery(" FROM UserInformation where email=:email");
 		q.setParameter("email", email);
 		return (UserInformation) q.uniqueResult();
 
 	}
 
+	/**
+	 * Getting the userInformation based on there Id
+	 * @return user details
+	 * @param id of the user
+	 */
 	@Override
 	public UserInformation getUserById(Long id) {
 		
@@ -48,6 +63,11 @@ public class UserRepositoryImplementation implements IUserRepository {
 		return (UserInformation) q.uniqueResult();
 
 	}
+	/**
+	 *  Here updating password
+	 *  @param password and id
+	 *  @return true and false
+	 */
 
 	@Override
 	public boolean upDate(PasswordUpdate information, Long id) {
@@ -64,6 +84,12 @@ public class UserRepositoryImplementation implements IUserRepository {
 			return false;
 		}
 	}
+	/**
+	 * verifying the user 
+	 * @param id
+	 * @return boolean value..
+	 * 
+	 */
 
 	@Override
 	public boolean verify(Long id) {
@@ -82,6 +108,11 @@ public class UserRepositoryImplementation implements IUserRepository {
 
 	}
 	
+	/**
+	 * Getting all the users at one time from the database
+	 * @param
+	 * @return all the users from the database
+	 */
 	@Override
 	public List<UserInformation> getUsers() {
 		Session currentsession = entityManager.unwrap(Session.class);
