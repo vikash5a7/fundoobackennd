@@ -6,6 +6,8 @@ import javax.persistence.EntityManager;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +17,8 @@ import com.bridgelabz.fundoonotes.repository.IUserRepository;
 
 @Repository
 public class UserRepositoryImplementation implements IUserRepository {
+
+	private static final Logger LOG = LoggerFactory.getLogger(UserRepositoryImplementation.class);
 
 	@Autowired
 	private EntityManager entityManager;
@@ -27,6 +31,8 @@ public class UserRepositoryImplementation implements IUserRepository {
 	 */
 	@Override
 	public UserInformation save(UserInformation userInformation) {
+		LOG.trace("inside the save repo..");
+		
 		Session session = entityManager.unwrap(Session.class);
 		session.saveOrUpdate(userInformation);
 		return userInformation;
@@ -40,6 +46,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 
 	@Override
 	public UserInformation getUser(String email) {
+		LOG.trace("inside the getUser repo..");
 		
 		Session session = entityManager.unwrap(Session.class);
 		@SuppressWarnings("rawtypes")
@@ -56,6 +63,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 	 */
 	@Override
 	public UserInformation getUserById(Long id) {
+		LOG.trace("inside the getUserById repo..");
 		
 		Session session = entityManager.unwrap(Session.class);
 		Query q = session.createQuery(" FROM UserInformation where id=:id");
@@ -72,6 +80,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 	@Override
 	public boolean upDate(PasswordUpdate information, Long id) {
 		
+		LOG.trace("inside the upDate repo..");
 		Session session = entityManager.unwrap(Session.class);
 		Query q = session.createQuery("update UserInformation set password=:p" + " " + " " + "where id=:i");
 		q.setParameter("p", information.getConfirmPassword());
@@ -93,7 +102,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 
 	@Override
 	public boolean verify(Long id) {
-		
+		LOG.trace("inside the verify repo..");
 		Session session = entityManager.unwrap(Session.class);
 		Query q = session.createQuery("update UserInformation set is_verified=:p" + " " + " " + "where id=:i");
 		q.setParameter("p", true);
@@ -115,6 +124,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 	 */
 	@Override
 	public List<UserInformation> getUsers() {
+		LOG.trace("inside the verify getUsers..");
 		Session currentsession = entityManager.unwrap(Session.class);
 		List<UserInformation> usersList = currentsession.createQuery("from UserInformation").getResultList();
 		return  usersList;

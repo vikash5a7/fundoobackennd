@@ -2,7 +2,6 @@ package com.bridgelabz.fundoonotes.controller;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,22 +18,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.bridgelabz.fundoonotes.Entity.PasswordUpdate;
 import com.bridgelabz.fundoonotes.Entity.UserInformation;
 import com.bridgelabz.fundoonotes.dto.UserDto;
 import com.bridgelabz.fundoonotes.request.LoginInformation;
 import com.bridgelabz.fundoonotes.responses.Response;
-import com.bridgelabz.fundoonotes.responses.UsersDetail;
+import com.bridgelabz.fundoonotes.responses.UsersDetailRes;
 import com.bridgelabz.fundoonotes.services.UserServices;
 import com.bridgelabz.fundoonotes.util.JwtGenerator;
+
 
 @RestController
 @RequestMapping
 @CrossOrigin(origins = "http://localhost:8080")
 public class UserController {
-	static final Logger LOGGER = Logger.getLogger(UserController.class);
-
+	private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
+	
+	 
 	
 	@Autowired
 	private UserServices service;
@@ -52,14 +55,16 @@ public class UserController {
 	@CachePut(value="user", key="#token")
 	@ResponseBody
 	public ResponseEntity<Response> registration(@RequestBody UserDto information) {
-
+		LOG.trace("Registration Started......");
 		boolean result = service.register(information);
 		if (result) {
-			
+			LOG.info("User Registered SucessFully...");
 			return ResponseEntity.status(HttpStatus.CREATED)
 					.body(new Response("registration successfull", 200, information));
+			
 		} else {
-                   
+			LOG.info("User not registred already exit...");
+			
 			return ResponseEntity.status(HttpStatus.ALREADY_REPORTED)
 					.body(new Response("user already exist", 400, information));
 		}
@@ -72,18 +77,19 @@ public class UserController {
 	 */
 
 	@PostMapping("/user/login")
-	public ResponseEntity<UsersDetail> login(@RequestBody LoginInformation information) {
+	public ResponseEntity<UsersDetailRes> login(@RequestBody LoginInformation information) {
+		LOG.trace("Login started....");
 		// sending to login.....
 		UserInformation userInformation = service.login(information);
-		System.out.println("inside login controler");
+		LOG.trace("inside the login controller");
 		if (userInformation!=null) {
 			String token=generate.jwtToken(userInformation.getUserId());
 			return ResponseEntity.status(HttpStatus.ACCEPTED).header("login successfull", information.getEmail())
-					.body(new UsersDetail(token, 200, information));
+					.body(new UsersDetailRes(token, 200, information));
 
 		} else {
 
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UsersDetail("Login failed", 400, information));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UsersDetailRes("Login failed Occured", 400, information));
 		}
 
 	}
@@ -95,13 +101,16 @@ public class UserController {
 	 */
 
 	@GetMapping("/user/verify/{token}")
+	
 	public ResponseEntity<Response> userVerification(@PathVariable("token") String token) throws Exception {
-
-		System.out.println("token for verification" + token);
+		LOG.trace("Verifying the user based on there valid token....");
+		LOG.info("token for verification" + token);
 		boolean update = service.verify(token);
 		if (update) {
+			LOG.info("verification Done");
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new Response("verified", 200));
 		} else {
+			LOG.info("verification Not Done");
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new Response("not verified", 400));
 
 		}
@@ -114,12 +123,15 @@ public class UserController {
 
 	@PostMapping("user/forgotpassword")
 	public ResponseEntity<Response> forgogPassword(@RequestParam("email") String email) {
-		System.out.println(email);
-
+		LOG.info("email: "+email);
+		LOG.trace("forget password...");
 		boolean result = service.isUserExist(email);
 		if (result) {
+			LOG.trace("User exit....");
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new Response("user exist", 200));
 		} else {
+			LOG.trace("user doesn't exit...");
+			
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new Response("user does not exist with given email id", 400));
 		}
 
@@ -132,7 +144,9 @@ public class UserController {
 
 	@PutMapping("user/update/{token}")
 	public ResponseEntity<Response> update(@PathVariable("token") String token, @RequestBody PasswordUpdate update) {
-		System.out.println("inside controller  " +update.getConfirmPassword());
+		LOG.trace("inside password verification controller  " +update.getConfirmPassword());
+		LOG.info("verfication token " +token);
+		
 		System.out.println("inside controller  " +token);
 		boolean result = service.update(update, token);
 		if (result) {
@@ -153,11 +167,10 @@ public class UserController {
 	@GetMapping("user/getusers")
 	@Cacheable(value="users")
 	public ResponseEntity<Response> getUsers(){
-		System.out.println("inside get users contr...");
+		LOG.trace("inside Get all user controller  ");
 		List<UserInformation> users=service.getUsers();
 		return ResponseEntity.status(HttpStatus.ACCEPTED)
 				.body(new Response("The user's are", 200, users));
-		
 	}
 	/**
 	 * This is used for the get one user based on there token 
@@ -167,6 +180,7 @@ public class UserController {
 	
 	@GetMapping("user/getOneUser")
 	public ResponseEntity<Response> getOneUsers(@RequestHeader("token") String token){
+		LOG.trace("inside the get one user controller");
 	UserInformation user=service.getSingleUser(token);
 		return ResponseEntity.status(HttpStatus.ACCEPTED)
 				.body(new Response("user is", 200, user));	

@@ -1,6 +1,6 @@
 package com.bridgelabz.fundoonotes.responses;
 
-public class UsersDetail {
+public class UsersDetailRes {
 	
 	private String token;
 	
@@ -8,7 +8,7 @@ public class UsersDetail {
 	
 	private Object obj;
 	
-	public UsersDetail(String token,int statuscode,Object obj)
+	public UsersDetailRes(String token,int statuscode,Object obj)
 	{
 		this.token=token;
 		

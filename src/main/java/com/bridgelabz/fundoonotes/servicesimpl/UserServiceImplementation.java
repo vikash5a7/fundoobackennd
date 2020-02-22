@@ -6,6 +6,8 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ import com.bridgelabz.fundoonotes.util.MailServiceProvider;
 public class UserServiceImplementation implements UserServices {
 
 	private UserInformation userInformation= new UserInformation();
+	private static final Logger LOG = LoggerFactory.getLogger(UserServiceImplementation.class);
 
 	@Autowired
 	private IUserRepository repository;
@@ -61,7 +64,7 @@ public class UserServiceImplementation implements UserServices {
 	@Transactional
 	@Override
 	public boolean register(UserDto information) {
-		System.out.println("inside service");
+		LOG.trace("Inside userRegitration Service");
 		UserInformation user = repository.getUser(information.getEmail());
 
 		if (user == null) {
@@ -73,8 +76,8 @@ public class UserServiceImplementation implements UserServices {
 			userInformation.setVerified(false);
 			// calling the save method
 			userInformation = repository.save(userInformation);
-			System.out.println("id" + " " + userInformation.getUserId());
-			System.out.println("token" + " " + generate.jwtToken(userInformation.getUserId()));
+			LOG.trace("id" + " " + userInformation.getUserId());
+			LOG.trace("token" + " " + generate.jwtToken(userInformation.getUserId()));
 			String mailResponse = response.formMessage("http://localhost:8080/user/verify", generate.jwtToken(userInformation.getUserId()));
 			// setting the data to mail
 			System.out.println(mailResponse);
@@ -101,9 +104,9 @@ public class UserServiceImplementation implements UserServices {
 	@Transactional
 	@Override
 	public UserInformation login(LoginInformation information) {
-		// Checking user is available or not with this email id
+		LOG.trace("Inside Login Service");
 		UserInformation user = repository.getUser(information.getEmail());
-		System.out.println("inside service " + user);
+		LOG.info("user info.. " + user);
 		if (user != null) {
 
 			if ((user.isVerified() == true) && encryption.matches(information.getPassword(), user.getPassword())) {
@@ -112,17 +115,12 @@ public class UserServiceImplementation implements UserServices {
 			} else {
 				String mailResponse = response.formMessage("http://localhost:8080/verify",
 						generate.jwtToken(user.getUserId()));
-
 				MailServiceProvider.sendEmail(information.getEmail(), "verification", mailResponse);
-
 				return null;
 			}
-
 		} else {
 			return null;
-
 		}
-
 	}
 
 	/**
@@ -134,36 +132,46 @@ public class UserServiceImplementation implements UserServices {
 	@Transactional
 	@Override
 	public boolean update(PasswordUpdate information, String token) {
+		LOG.trace("Inside Password Service");
 		if (information.getNewPassword().equals(information.getConfirmPassword())) {
 
 			Long id = null;
 			try {
-				System.out.println("in update method" + "   " + generate.parseJWT(token));
+				LOG.info("in update method" + "   " + generate.parseJWT(token));
 				id = (long) generate.parseJWT(token);
 				String epassword = encryption.encode(information.getConfirmPassword());
 				information.setConfirmPassword(epassword);
 				return repository.upDate(information, id);
 			} catch (Exception e) {
-				throw new UserException("invalid credentials");
-			}
-
+				throw new UserException("invalid credentials");}
 		}
-
 		else {
 			throw new UserException("invalid password");
 		}
-
 	}
+	
+	/**
+	 * Generating the token
+	 * @param id
+	 * @return generated token
+	 */ 
 
 	public String generateToken(Long id) {
+		LOG.trace("Inside Generate password Service");
 		return generate.jwtToken(id);
 
 	}
+	/**
+	 * Verifying the user based on there token
+	 * @param id
+	 * @return generated token
+	 */
 
 	@Transactional
 	@Override
 	public boolean verify(String token) throws Exception {
-		System.out.println("id in verification" + (long) generate.parseJWT(token));
+		LOG.trace("Inside verify token Service");
+		LOG.info("id in verification" + (long) generate.parseJWT(token));
 		Long id = (long) generate.parseJWT(token);
 		repository.verify(id);
 		return true;
@@ -171,6 +179,7 @@ public class UserServiceImplementation implements UserServices {
 
 	@Override
 	public boolean isUserExist(String email) {
+		LOG.trace("Inside cheching user is exit or not ");
 		try {
 			UserInformation user = repository.getUser(email);
 			if (user.isVerified() == true) {
@@ -189,7 +198,7 @@ public class UserServiceImplementation implements UserServices {
 	@Transactional
 	@Override
 	public List<UserInformation> getUsers() {
-		System.out.println("inside get users");
+		LOG.trace("Inside all get user  Service");
 		List<UserInformation> users = repository.getUsers();
 		UserInformation user = users.get(0);
 		List<NoteInformation> note = user.getColaborateNote();
@@ -200,17 +209,15 @@ public class UserServiceImplementation implements UserServices {
 	@Transactional
 	@Override
 	public UserInformation getSingleUser(String token) {
+		LOG.trace("Inside getting single user service");
 		Long id;
 		try {
 			 id = (long) generate.parseJWT(token);
 		} catch (Exception e) {
-
-			throw new UserException("User doesn't exist");
-		}
-		
+			throw new UserException("User doesn't exist");}
 		UserInformation user=repository.getUserById(id);
-		System.out.println(user.getColaborateNote().toString());
-		return null;
+		LOG.info(user.getColaborateNote().toString());	
+		return user;
 	}
 
 }
