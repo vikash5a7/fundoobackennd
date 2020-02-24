@@ -18,30 +18,30 @@ public class NoteInformation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
-	
+
 	private String title;
-	
+
 	private String description;
-	
+
 	private boolean isArchieved;
-	
+
 	private boolean isPinned;
-	
+
 	private boolean isTrashed;
-	
+
 	private LocalDateTime createdDateAndTime;
-	
+
 	private LocalDateTime upDateAndTime;
-	
+
 	private String colour;
-	
+
 	private LocalDateTime reminder;
 
 	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "Label_Note", joinColumns = { @JoinColumn(name = "note_id") }, inverseJoinColumns = {
 			@JoinColumn(name = "label_id") })
 	private List<LabelInformation> list;
-	
+
 	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "Collaborator_Note", joinColumns = { @JoinColumn(name = "note_id") }, inverseJoinColumns = {
 			@JoinColumn(name = "user_id") })
@@ -142,5 +142,13 @@ public class NoteInformation {
 	public void setColabUser(List<UserInformation> colabUser) {
 		this.colabUser = colabUser;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "NoteInformation [id=" + id + ", title=" + title + ", description=" + description + ", isArchieved="
+				+ isArchieved + ", isPinned=" + isPinned + ", isTrashed=" + isTrashed + ", createdDateAndTime="
+				+ createdDateAndTime + ", upDateAndTime=" + upDateAndTime + ", colour=" + colour + ", reminder="
+				+ reminder + ", list=" + list + ", colabUser=" + colabUser + "]";
+	}
+
 }

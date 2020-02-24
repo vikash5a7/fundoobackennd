@@ -24,27 +24,35 @@ import com.bridgelabz.fundoonotes.services.LabelService;
 
 @RestController
 @RequestMapping
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:8080")
 public class LabelController {
 
 	@Autowired
 	private LabelService service;
 
+	/**
+	 * creating Label controller...
+	 *
+	 * @param label
+	 * @param token
+	 * @return Response
+	 */
+
 	@PostMapping("/label/create")
 	public ResponseEntity<Response> createLabel(@RequestBody LabelDto label, @RequestHeader("token") String token) {
 		System.out.println(label.getName());
 		service.createLabel(label, token);
-		
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(new Response("label created", 200, label));
 	}
-	
+
 
 	@PostMapping("/label/createandmap")
 	public ResponseEntity<Response> createLabelAndMap(@RequestBody LabelDto label, @RequestHeader("token") String token,@RequestParam("noteId") Long noteId) {
 		System.out.println("label is"+label.getName());
 		System.out.println("note id is"+noteId);
 		service.createLabelAndMap(label, token, noteId);
-		
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(new Response("label created", 200, label));
 	}
 
@@ -56,7 +64,7 @@ public class LabelController {
 		return ResponseEntity.status(HttpStatus.OK).body(new Response("label added", 200));
 
 	}
-	
+
 	@PostMapping("/label/removelabel")
 	public ResponseEntity<Response> removeLabel(@RequestParam("labelId") Long labelId,
 			@RequestHeader("token") String token, @RequestParam("noteId") Long noteId) {
@@ -92,7 +100,7 @@ public class LabelController {
 	@GetMapping("/label/getLabelNotes")
 	public ResponseEntity<Response> getNotes(@RequestHeader("token") String token,@RequestParam("id") Long labelId) {
 	List<NoteInformation> list=service.getAllNotes(token, labelId);
-		
+
 	return ResponseEntity.status(HttpStatus.OK).body(new Response("The result is", 200, list));
 
 	}

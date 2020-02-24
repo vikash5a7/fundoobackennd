@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.bridgelabz.fundoonotes.Entity.NoteInformation;
 import com.bridgelabz.fundoonotes.Entity.PasswordUpdate;
 import com.bridgelabz.fundoonotes.Entity.UserInformation;
 import com.bridgelabz.fundoonotes.configurations.RabbitMQSender;
@@ -46,7 +45,7 @@ public class UserServiceImplementation implements UserServices {
 
 	@Autowired
 	private MailObject mailObject;
-	
+
 	@Autowired
 	private ModelMapper modelMapper;
 
@@ -56,9 +55,9 @@ public class UserServiceImplementation implements UserServices {
 	/**
 	 * This is for Storing the informing of the user in data
 	 * @param user information
-	 * @return it's return true and false 
-	 * if user get registered then it's responsible for saving the data in data 
-	 * 
+	 * @return it's return true and false
+	 * if user get registered then it's responsible for saving the data in data
+	 *
 	 */
 
 	@Transactional
@@ -71,7 +70,7 @@ public class UserServiceImplementation implements UserServices {
 			userInformation = modelMapper.map(information, UserInformation.class);
 			userInformation.setCreatedDate(LocalDateTime.now());
 			String epassword = encryption.encode(information.getPassword());
-			// setting the some extra information and encrypting the password 
+			// setting the some extra information and encrypting the password
 			userInformation.setPassword(epassword);
 			userInformation.setVerified(false);
 			// calling the save method
@@ -92,13 +91,13 @@ public class UserServiceImplementation implements UserServices {
 		}
 
 	}
-	
+
 	/**
-	 * This is responsible to handle the login if user is verify then only user can login 
-	 * if user is not verify then it's will send a link to to verify	
+	 * This is responsible to handle the login if user is verify then only user can
+	 * login if user is not verify then it's will send a link to to verify
+	 * 
 	 * @param Login information
 	 * @return null
-	 * 
 	 */
 
 	@Transactional
@@ -124,10 +123,10 @@ public class UserServiceImplementation implements UserServices {
 	}
 
 	/**
-	 * if user is not verify then it's will send a link to to verify	
+	 * if user is not verify then it's will send a link to to verify
 	 * @param PasswordUpdate information and token
 	 * @return true and false
-	 * 
+	 *
 	 */
 	@Transactional
 	@Override
@@ -149,12 +148,12 @@ public class UserServiceImplementation implements UserServices {
 			throw new UserException("invalid password");
 		}
 	}
-	
+
 	/**
 	 * Generating the token
 	 * @param id
 	 * @return generated token
-	 */ 
+	 */
 
 	public String generateToken(Long id) {
 		LOG.trace("Inside Generate password Service");
@@ -171,12 +170,19 @@ public class UserServiceImplementation implements UserServices {
 	@Override
 	public boolean verify(String token) throws Exception {
 		LOG.trace("Inside verify token Service");
-		LOG.info("id in verification" + (long) generate.parseJWT(token));
+		LOG.info("id in verification" + generate.parseJWT(token));
 		Long id = (long) generate.parseJWT(token);
 		repository.verify(id);
 		return true;
 	}
 
+	/**
+	 * checking the user is present or or not if present then it's will send a email
+	 * to verify
+	 *
+	 * @param email
+	 * @return boolean value
+	 */
 	@Override
 	public boolean isUserExist(String email) {
 		LOG.trace("Inside cheching user is exit or not ");
@@ -194,18 +200,28 @@ public class UserServiceImplementation implements UserServices {
 			throw new UserException("User doesn't exist");
 		}
 	}
-      
+
+	/**
+	 * getting all the user
+	 *
+	 * @return list of the users from the database
+	 */
 	@Transactional
 	@Override
 	public List<UserInformation> getUsers() {
 		LOG.trace("Inside all get user  Service");
 		List<UserInformation> users = repository.getUsers();
 		UserInformation user = users.get(0);
-		List<NoteInformation> note = user.getColaborateNote();
+		user.getColaborateNote();
 		return users;
 	}
 
-	
+	/**
+	 * by this we can get the single user
+	 *
+	 * @param it's taking the token
+	 * @return returning the single user
+	 */
 	@Transactional
 	@Override
 	public UserInformation getSingleUser(String token) {
@@ -216,7 +232,7 @@ public class UserServiceImplementation implements UserServices {
 		} catch (Exception e) {
 			throw new UserException("User doesn't exist");}
 		UserInformation user=repository.getUserById(id);
-		LOG.info(user.getColaborateNote().toString());	
+		LOG.info(user.getColaborateNote().toString());
 		return user;
 	}
 

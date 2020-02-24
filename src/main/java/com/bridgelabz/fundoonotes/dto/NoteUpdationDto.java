@@ -1,19 +1,25 @@
-package com.bridgelabz.fundoonotes.request;
+package com.bridgelabz.fundoonotes.dto;
 
-public class NoteUpdation {
-	
+import java.time.LocalDateTime;
+
+public class NoteUpdationDto {
+
 	private long id;
-	
+
 	private String title;
-	
+
 	private String description;
-	
+
 	private boolean isArchieved;
-	
+
 	private boolean isPinned;
-	
+
 	private boolean isTrashed;
-	
+
+	private LocalDateTime createdDateAndTime;
+
+	private LocalDateTime upDateAndTime;
+
 	public long getId() {
 		return id;
 	}
@@ -60,5 +66,21 @@ public class NoteUpdation {
 
 	public void setTrashed(boolean isTrashed) {
 		this.isTrashed = isTrashed;
+	}
+
+	public LocalDateTime getCreatedDateAndTime() {
+		return createdDateAndTime;
+	}
+
+	public void setCreatedDateAndTime(LocalDateTime createdDateAndTime) {
+		this.createdDateAndTime = createdDateAndTime;
+	}
+
+	public LocalDateTime getUpDateAndTime() {
+		return upDateAndTime;
+	}
+
+	public void setUpDateAndTime(LocalDateTime upDateAndTime) {
+		this.upDateAndTime = upDateAndTime;
 	}
 }

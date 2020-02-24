@@ -11,27 +11,30 @@ import org.springframework.stereotype.Repository;
 
 import com.bridgelabz.fundoonotes.Entity.LabelInformation;
 import com.bridgelabz.fundoonotes.Entity.NoteInformation;
+import com.bridgelabz.fundoonotes.repository.ILabelRepository;
 
 @Repository
-public class LabelRepository {
+public class LabelRepository implements ILabelRepository {
 
 	@Autowired
 	private EntityManager entityManager;
 
+	@Override
 	public LabelInformation save(LabelInformation labelInformation) {
 
 		Session session = entityManager.unwrap(Session.class);
 		session.save(labelInformation);
 		return labelInformation;
 	}
-	
+
+	@Override
 	public NoteInformation saveNote(NoteInformation noteInformation) {
 
 		Session session = entityManager.unwrap(Session.class);
 		session.save(noteInformation);
 		return noteInformation;
 	}
-	
+
 
 	public LabelInformation fetchLabel(Long userid, String labelname) {
 
@@ -40,7 +43,7 @@ public class LabelRepository {
 		Query q = session.createQuery("from LabelInformation where user_id=:id and name=:name");
 		q.setParameter("id", userid);
 		q.setParameter("name", labelname);
-		return (LabelInformation) q.uniqueResult(); 
+		return (LabelInformation) q.uniqueResult();
 
 	}
 
@@ -63,7 +66,7 @@ public class LabelRepository {
 		int result = query.executeUpdate();
 		return result;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<LabelInformation> getAllLabel(Long id)
 	{
@@ -71,7 +74,7 @@ public class LabelRepository {
 		Session session = entityManager.unwrap(Session.class);
 		return session.createQuery("from LabelInformation where user_Id='"+id+"'").getResultList();
 	}
-	
+
 	public LabelInformation getLabel(Long id)
 	{
 		String hql = "FROM LabelInformation " + "WHERE label_id=:id";
@@ -82,7 +85,7 @@ public class LabelRepository {
 		 * query.setParameter("id", id); return query.getResultList();
 		 */
 	}
-	
-	
+
+
 
 }

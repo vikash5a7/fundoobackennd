@@ -2,9 +2,6 @@ package com.bridgelabz.fundoonotes.responses;
 
 import java.util.List;
 
-import lombok.Data;
-
-@Data
 public class Response {
 
 	private String message;
@@ -59,7 +56,4 @@ public class Response {
 	public void setDetails(List<String> details) {
 		this.details = details;
 	}
-
-	
-
 }

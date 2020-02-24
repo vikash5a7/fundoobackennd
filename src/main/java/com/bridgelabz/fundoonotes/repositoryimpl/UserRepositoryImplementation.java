@@ -22,7 +22,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 
 	@Autowired
 	private EntityManager entityManager;
-	
+
 
 	/**
 	 *  This is for saving the data in database
@@ -32,7 +32,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 	@Override
 	public UserInformation save(UserInformation userInformation) {
 		LOG.trace("inside the save repo..");
-		
+
 		Session session = entityManager.unwrap(Session.class);
 		session.saveOrUpdate(userInformation);
 		return userInformation;
@@ -41,13 +41,13 @@ public class UserRepositoryImplementation implements IUserRepository {
 	/**
 	 * Getting data from the database based on there email
 	 * @param email
-	 * @return unique result of users details 
+	 * @return unique result of users details
 	 */
 
 	@Override
 	public UserInformation getUser(String email) {
 		LOG.trace("inside the getUser repo..");
-		
+
 		Session session = entityManager.unwrap(Session.class);
 		@SuppressWarnings("rawtypes")
 		Query q = session.createQuery(" FROM UserInformation where email=:email");
@@ -64,7 +64,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 	@Override
 	public UserInformation getUserById(Long id) {
 		LOG.trace("inside the getUserById repo..");
-		
+
 		Session session = entityManager.unwrap(Session.class);
 		Query q = session.createQuery(" FROM UserInformation where id=:id");
 		q.setParameter("id", id);
@@ -79,7 +79,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 
 	@Override
 	public boolean upDate(PasswordUpdate information, Long id) {
-		
+
 		LOG.trace("inside the upDate repo..");
 		Session session = entityManager.unwrap(Session.class);
 		Query q = session.createQuery("update UserInformation set password=:p" + " " + " " + "where id=:i");
@@ -94,10 +94,10 @@ public class UserRepositoryImplementation implements IUserRepository {
 		}
 	}
 	/**
-	 * verifying the user 
+	 * verifying the user
 	 * @param id
 	 * @return boolean value..
-	 * 
+	 *
 	 */
 
 	@Override
@@ -116,7 +116,7 @@ public class UserRepositoryImplementation implements IUserRepository {
 		}
 
 	}
-	
+
 	/**
 	 * Getting all the users at one time from the database
 	 * @param
@@ -129,6 +129,4 @@ public class UserRepositoryImplementation implements IUserRepository {
 		List<UserInformation> usersList = currentsession.createQuery("from UserInformation").getResultList();
 		return  usersList;
 	}
-
-
 }
