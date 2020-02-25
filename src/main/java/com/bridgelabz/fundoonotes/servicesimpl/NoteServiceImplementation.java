@@ -361,9 +361,10 @@ public class NoteServiceImplementation implements NoteService {
 			LOG.info("user id" + " " + userid);
 			NoteInformation note = noteRepository.findById(noteId);
 			if (note != null) {
-				note.setReminder(null);
+				note.setReminder(LocalDateTime.now());
 				noteRepository.save(note);
 			} else {
+				LOG.warn("user is not valid:");
 				throw new UserException("note doesn't exist");
 			}
 		} catch (Exception e) {
@@ -382,9 +383,11 @@ public class NoteServiceImplementation implements NoteService {
 	@Transactional
 	public List<NoteInformation> getAllPinnedNotes(String token) {
 		LOG.trace("Inside the Note Service getAllPinnedNotes ..");
+		Long userId;
 		List<NoteInformation> allNotes;
 		try {
-			Long userId = (long) tokenGenerator.parseJWT(token);
+			userId = (long) tokenGenerator.parseJWT(token);
+			LOG.info("User Id: " + userId);
 			user = repository.getUserById(userId);
 			LOG.info("user id" + " " + user);
 			if (user != null) {
@@ -406,15 +409,14 @@ public class NoteServiceImplementation implements NoteService {
 	/**
 	 * Searching notes Based on there title
 	 *
-	 * @param .title
+	 * @param title
 	 * @param token
 	 * @return list of notes
 	 */
 
 	@Override
-	public List<NoteInformation> searchNotesByTitle(String token, String title) {
+	public List<NoteInformation> searchNotesByTitle(String title, String token) {
 		LOG.trace("Inside the Note Service searchByTitle ..");
-		List<NoteInformation> allNotes = null;
 		try
 		{
 			Long userId = tokenGenerator.parseJWT(token);
@@ -424,20 +426,17 @@ public class NoteServiceImplementation implements NoteService {
 				LOG.info("user logged in" + user.getUserId());
 				List<NoteInformation> list11 = noteRepository.getNotes(userId);
 				if (list11 != null) {
-
-
-//					allNotes = list11.stream().
-//							  anyMatch(note ->
-//							  note.getTitle().equals(title)
-//					        .collect(Collectors.toList());
-					LOG.info("List " + allNotes);
+					LOG.info("" + list11);
+					return list11.stream().filter(note -> note.getTitle().equalsIgnoreCase(title))
+							.collect(Collectors.toList());
 				}
 			}
 		}
 		catch (Exception e) {
+			LOG.warn("error " + e);
 			LOG.info("user not exit or authentcation fail");
 		}
-		return allNotes;
+		return null;
 	}
 
 	@Override
