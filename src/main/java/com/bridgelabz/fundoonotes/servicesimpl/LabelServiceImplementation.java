@@ -30,15 +30,23 @@ public class LabelServiceImplementation implements LabelService {
 
 	@Autowired
 	private IUserRepository userRepository;
-	
+
 	@Autowired
 	private JwtGenerator tokenGenerator;
 
 	@Autowired
 	private NoteRepository noteRepository;
-	
+
 	@Autowired
 	private ModelMapper modelMapper;
+
+	/**
+	 * Creating label..
+	 *
+	 * @param label
+	 * @param toke
+	 * @return Nothing
+	 */
 
 	@Transactional
 	@Override
@@ -68,7 +76,15 @@ public class LabelServiceImplementation implements LabelService {
 			throw new UserException("Note does not exist with the given id");
 		}
 	}
-	
+
+	/**
+	 * Creating create label and map
+	 *
+	 * @param label
+	 * @param token
+	 * @param noteId
+	 */
+
 	@Transactional
 	@Override
 	public void createLabelAndMap(LabelDto label, String token,Long noteId) {
@@ -90,8 +106,8 @@ public class LabelServiceImplementation implements LabelService {
 				repository.save(labelInformation);
 				NoteInformation note=noteRepository.findById(noteId);
 				note.getList().add(labelInformation);
-				noteRepository.save(note);	
-				
+				noteRepository.save(note);
+
 			} else {
 				throw new UserException("label with the given name is already present");
 			}
@@ -100,7 +116,15 @@ public class LabelServiceImplementation implements LabelService {
 		}
 
 	}
-	
+
+	/**
+	 * Adding the label
+	 *
+	 * @param label  id
+	 * @param noteId
+	 * @param token
+	 *
+	 */
 	@Transactional
 	@Override
 	public void addLabel(Long labelId, Long noteId, String token) {
@@ -110,29 +134,40 @@ public class LabelServiceImplementation implements LabelService {
 		repository.save(label);
 	}
 
+	/**
+	 * Remove label
+	 *
+	 * @param label id
+	 * @param note  id
+	 * @param token
+	 */
+
 	@Transactional
 	@Override
 	public void removeLabel(Long labelId, Long noteId, String token) {
 		NoteInformation note = noteRepository.findById(noteId);
 		LabelInformation label = repository.fetchLabelById(labelId);
 		note.getList().remove(label);
-		
 		noteRepository.save(note);
 	}
 
-	
+	/**
+	 * edit label
+	 * 
+	 * @param label
+	 * @param token
+	 */
+
+
 	@Transactional
 	@Override
 	public void editLabel(LabelUpdate label, String token) {
 		Long id = null;
-
 		try {
 			id = (long) tokenGenerator.parseJWT(token);
 		} catch (Exception e) {
-
 			throw new UserException("user is not present ");
 		}
-
 		UserInformation user = userRepository.getUserById(id);
 		if (user != null) {
 			LabelInformation labelInfo = repository.fetchLabelById(label.getLabelId());
@@ -142,12 +177,17 @@ public class LabelServiceImplementation implements LabelService {
 			} else {
 				throw new UserException("label with the given id does not exist");
 			}
-
 		} else {
 			throw new UserException("user does not exist");
 		}
-
 	}
+
+	/**
+	 * Deleting label
+	 *
+	 * @param info
+	 * @param token
+	 */
 
 	@Transactional
 	@Override
@@ -160,7 +200,6 @@ public class LabelServiceImplementation implements LabelService {
 
 			throw new UserException("User does not exist");
 		}
-
 		UserInformation user = userRepository.getUserById(id);
 		if (user != null) {
 			LabelInformation labelInfo = repository.fetchLabelById(info.getLabelId());
@@ -170,8 +209,13 @@ public class LabelServiceImplementation implements LabelService {
 				throw new UserException("Note does not exist");
 			}
 		}
-
 	}
+
+	/**
+	 * getting all label
+	 *
+	 * @param token
+	 */
 
 	@Override
 	public List<LabelInformation> getLabel(String token) {
@@ -189,12 +233,18 @@ public class LabelServiceImplementation implements LabelService {
 
 	}
 
+	/**
+	 * Getting all notes
+	 *
+	 * @param token
+	 * @param label id
+	 */
 	@Override
 	public List<NoteInformation> getAllNotes(String token, Long labelId) {
 		LabelInformation label=repository.getLabel(labelId);
 		List<NoteInformation> list=label.getList();
 		System.out.println("label is"+list);
-		
+
 		return list;
 	}
 

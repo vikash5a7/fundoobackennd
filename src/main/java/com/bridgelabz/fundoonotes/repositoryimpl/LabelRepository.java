@@ -36,6 +36,7 @@ public class LabelRepository implements ILabelRepository {
 	}
 
 
+	@Override
 	public LabelInformation fetchLabel(Long userid, String labelname) {
 
 		Session session = entityManager.unwrap(Session.class);
@@ -47,6 +48,7 @@ public class LabelRepository implements ILabelRepository {
 
 	}
 
+	@Override
 	public LabelInformation fetchLabelById(Long id) {
 
 		Session session = entityManager.unwrap(Session.class);
@@ -58,34 +60,30 @@ public class LabelRepository implements ILabelRepository {
 
 	}
 
+	@Override
 	public int deleteLabel(Long i) {
 		String hql = "DELETE FROM LabelInformation " + "WHERE label_id = :id";
 		Session session = entityManager.unwrap(Session.class);
+		@SuppressWarnings("rawtypes")
 		Query query = session.createQuery(hql);
 		query.setParameter("id", i);
 		int result = query.executeUpdate();
 		return result;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<LabelInformation> getAllLabel(Long id)
 	{
-		String hql = "FROM LabelInformation " + "WHERE user_id=:id";
 		Session session = entityManager.unwrap(Session.class);
 		return session.createQuery("from LabelInformation where user_Id='"+id+"'").getResultList();
 	}
 
+	@Override
 	public LabelInformation getLabel(Long id)
 	{
-		String hql = "FROM LabelInformation " + "WHERE label_id=:id";
 		Session session = entityManager.unwrap(Session.class);
-		//Query query = session.createQuery(hql);
 		return (LabelInformation) session.createQuery("from LabelInformation where label_id='"+id+"'").uniqueResult();
-		/*
-		 * query.setParameter("id", id); return query.getResultList();
-		 */
+
 	}
-
-
-
 }

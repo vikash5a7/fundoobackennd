@@ -95,7 +95,7 @@ public class UserServiceImplementation implements UserServices {
 	/**
 	 * This is responsible to handle the login if user is verify then only user can
 	 * login if user is not verify then it's will send a link to to verify
-	 * 
+	 *
 	 * @param Login information
 	 * @return null
 	 */
@@ -151,6 +151,7 @@ public class UserServiceImplementation implements UserServices {
 
 	/**
 	 * Generating the token
+	 *
 	 * @param id
 	 * @return generated token
 	 */

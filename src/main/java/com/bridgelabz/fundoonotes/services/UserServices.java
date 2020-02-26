@@ -12,17 +12,10 @@ public interface UserServices {
 	UserInformation login(LoginInformation information);
 
 	boolean register(UserDto ionformation);
-	
-	
-
 	boolean verify(String token) throws Exception;
-	
 	boolean isUserExist(String email);
-
 	boolean update(PasswordUpdate information, String token);
-
 	List<UserInformation> getUsers();
-
 	UserInformation getSingleUser(String token);
 
 	
