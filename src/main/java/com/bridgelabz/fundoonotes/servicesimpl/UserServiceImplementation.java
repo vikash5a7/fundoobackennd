@@ -12,13 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.bridgelabz.fundoonotes.Entity.PasswordUpdate;
 import com.bridgelabz.fundoonotes.Entity.UserInformation;
 import com.bridgelabz.fundoonotes.configurations.RabbitMQSender;
 import com.bridgelabz.fundoonotes.dto.UserDto;
 import com.bridgelabz.fundoonotes.exception.UserException;
 import com.bridgelabz.fundoonotes.repository.IUserRepository;
 import com.bridgelabz.fundoonotes.request.LoginInformation;
+import com.bridgelabz.fundoonotes.request.PasswordUpdate;
 import com.bridgelabz.fundoonotes.responses.MailObject;
 import com.bridgelabz.fundoonotes.responses.MailResponse;
 import com.bridgelabz.fundoonotes.services.UserServices;

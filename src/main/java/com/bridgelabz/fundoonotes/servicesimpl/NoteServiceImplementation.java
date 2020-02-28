@@ -244,12 +244,10 @@ public class NoteServiceImplementation implements NoteService {
 			Long userId = (long) tokenGenerator.parseJWT(token);
 			user = repository.getUserById(userId);
 			if (user != null) {
-				System.out.println(user);
 				List<NoteInformation> list = noteRepository.getTrashedNotes(userId);
-				System.out.println("note fetched is" + " " + list.get(0));
+				LOG.trace("note fetched is" + " " + list.get(0));
 				return list;
 			} else {
-				System.out.println(user + "hello");
 				throw new UserException("note does not exist");
 			}
 		} catch (Exception e) {

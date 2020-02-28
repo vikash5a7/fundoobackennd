@@ -14,8 +14,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.Data;
 
 
@@ -38,6 +36,5 @@ public class UserInformation {
 	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "Collaborator_Note", joinColumns = { @JoinColumn(name = "user_id") }, inverseJoinColumns = {
 			@JoinColumn(name = "note_id") })
-	@JsonIgnore
 	private List<NoteInformation> colaborateNote;
 }

@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.bridgelabz.fundoonotes.Entity.PasswordUpdate;
 import com.bridgelabz.fundoonotes.Entity.UserInformation;
 import com.bridgelabz.fundoonotes.repository.IUserRepository;
+import com.bridgelabz.fundoonotes.request.PasswordUpdate;
 
 @Repository
 public class UserRepositoryImplementation implements IUserRepository {

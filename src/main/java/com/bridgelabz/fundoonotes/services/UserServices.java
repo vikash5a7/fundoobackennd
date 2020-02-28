@@ -2,10 +2,10 @@ package com.bridgelabz.fundoonotes.services;
 
 import java.util.List;
 
-import com.bridgelabz.fundoonotes.Entity.PasswordUpdate;
 import com.bridgelabz.fundoonotes.Entity.UserInformation;
 import com.bridgelabz.fundoonotes.dto.UserDto;
 import com.bridgelabz.fundoonotes.request.LoginInformation;
+import com.bridgelabz.fundoonotes.request.PasswordUpdate;
 
 public interface UserServices {
 

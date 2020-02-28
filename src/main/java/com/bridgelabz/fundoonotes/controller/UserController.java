@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bridgelabz.fundoonotes.Entity.PasswordUpdate;
 import com.bridgelabz.fundoonotes.Entity.UserInformation;
 import com.bridgelabz.fundoonotes.dto.UserDto;
 import com.bridgelabz.fundoonotes.request.LoginInformation;
+import com.bridgelabz.fundoonotes.request.PasswordUpdate;
 import com.bridgelabz.fundoonotes.responses.Response;
 import com.bridgelabz.fundoonotes.responses.UsersDetailRes;
 import com.bridgelabz.fundoonotes.services.UserServices;

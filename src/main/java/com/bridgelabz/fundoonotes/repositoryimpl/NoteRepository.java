@@ -126,7 +126,8 @@ public class NoteRepository implements INoteRepositary {
 		LOG.trace("Inside NoteRepository of getTrashedNotes ");
 		Session session = entityManager.unwrap(Session.class);
 
-		return session.createQuery("from NoteInformation where user_Id='" + userid + "'" + " and is_trashed=true")
+		return session
+				.createQuery("from NoteInformation where noteInformationId='" + userid + "'" + " and is_trashed=true")
 				.getResultList();
 	}
 
