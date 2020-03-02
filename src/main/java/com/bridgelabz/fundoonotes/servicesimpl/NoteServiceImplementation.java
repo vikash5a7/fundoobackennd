@@ -21,6 +21,7 @@ import com.bridgelabz.fundoonotes.repository.IUserRepository;
 import com.bridgelabz.fundoonotes.repositoryimpl.NoteRepository;
 import com.bridgelabz.fundoonotes.request.NoteUpdation;
 import com.bridgelabz.fundoonotes.request.ReminderDto;
+import com.bridgelabz.fundoonotes.services.ElasticSearchService;
 import com.bridgelabz.fundoonotes.services.NoteService;
 import com.bridgelabz.fundoonotes.util.JwtGenerator;
 
@@ -34,6 +35,9 @@ public class NoteServiceImplementation implements NoteService {
 	private IUserRepository repository;
 
 	private UserInformation user = new UserInformation();
+
+	@Autowired
+	private ElasticSearchService elasticService;
 
 	@Autowired
 	private NoteRepository noteRepository;
@@ -68,7 +72,12 @@ public class NoteServiceImplementation implements NoteService {
 				noteinformation.setTrashed(false);
 				noteinformation.setColour("white");
 				user.getNote().add(noteinformation);
-				noteRepository.save(noteinformation);
+				NoteInformation note = noteRepository.save(noteinformation);
+				if (note != null) {
+					String createNote = elasticService.createNote(note);
+					LOG.info("Create Node" + createNote);
+				}
+
 			} else {
 				throw new UserException("note is not present with the given id ");}
 		}catch (Exception e) {
@@ -415,27 +424,36 @@ public class NoteServiceImplementation implements NoteService {
 	@Override
 	public List<NoteInformation> searchNotesByTitle(String title, String token) {
 		LOG.trace("Inside the Note Service searchByTitle ..");
-		try
-		{
-			Long userId = tokenGenerator.parseJWT(token);
-			UserInformation user = repository.getUserById(userId);
-			LOG.info("user :" + user);
-			if (user != null) {
-				LOG.info("user logged in" + user.getUserId());
-				List<NoteInformation> list11 = noteRepository.getNotes(userId);
-				if (list11 != null) {
-					LOG.info("" + list11);
-					return list11.stream().filter(note -> note.getTitle().equalsIgnoreCase(title))
-							.collect(Collectors.toList());
-				}
-			}
+
+		List<NoteInformation> notes = elasticService.searchbytitle(title);
+		if (notes != null) {
+			return notes;
 		}
-		catch (Exception e) {
-			LOG.warn("error " + e);
-			LOG.info("user not exit or authentcation fail");
+		else {
+			return null;
 		}
-		return null;
 	}
+//		try
+//		{
+//			Long userId = tokenGenerator.parseJWT(token);
+//			UserInformation user = repository.getUserById(userId);
+//			LOG.info("user :" + user);
+//			if (user != null) {
+//				LOG.info("user logged in" + user.getUserId());
+//				List<NoteInformation> list11 = noteRepository.getNotes(userId);
+//				if (list11 != null) {
+//					LOG.info("" + list11);
+//					return list11.stream().filter(note -> note.getTitle().equalsIgnoreCase(title))
+//							.collect(Collectors.toList());
+//				}
+//			}
+//		}
+//		catch (Exception e) {
+//			LOG.warn("error " + e);
+//			LOG.info("user not exit or authentcation fail");
+//		}
+//		return null;
+
 
 	@Override
 	public List<NoteInformation> searchByTitle(String title, String token) {

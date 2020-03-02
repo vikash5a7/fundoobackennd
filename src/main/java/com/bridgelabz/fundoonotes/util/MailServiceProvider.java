@@ -11,17 +11,12 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 import com.bridgelabz.fundoonotes.responses.MailObject;
 
 @Component
 public class MailServiceProvider {
-	@Autowired
-	private static JavaMailSender javaMailSender;
-
 	public static void sendEmail(String toEmail, String subject, String body) {
 
 		String fromEmail = System.getenv("email");
