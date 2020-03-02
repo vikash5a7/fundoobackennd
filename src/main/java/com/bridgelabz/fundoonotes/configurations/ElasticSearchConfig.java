@@ -10,11 +10,9 @@ public class ElasticSearchConfig {
 
 
 	@Bean(destroyMethod = "close")
-	public RestHighLevelClient client()
-	{
+	public RestHighLevelClient client() {
 		System.setProperty("es.set.netty.runtime.available.processors", "false");
 		return new RestHighLevelClient(RestClient.builder(new HttpHost("localhost", 9200, "http")));
 
 	}
-
 }

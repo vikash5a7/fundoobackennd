@@ -110,7 +110,11 @@ public class NoteServiceImplementation implements NoteService {
 				note.setArchieved(information.isArchieved());
 				note.setArchieved(information.isTrashed());
 				note.setUpDateAndTime(LocalDateTime.now());
-				noteRepository.save(note);
+				NoteInformation save = noteRepository.save(note);
+				if (save != null) {
+					elasticService.updateNote(information.getId());
+					LOG.trace("Note Update in elastic..");
+				}
 			} else {
 				throw new UserException("Note is not present");
 			}
@@ -135,6 +139,7 @@ public class NoteServiceImplementation implements NoteService {
 		NoteInformation note = noteRepository.findById(id);
 		note.setTrashed(!note.isTrashed());
 		noteRepository.save(note);
+		elasticService.updateNote(id);
 
 	}
 
@@ -154,6 +159,7 @@ public class NoteServiceImplementation implements NoteService {
 		if (note != null) {
 		note.setArchieved(!note.isArchieved());
 		noteRepository.save(note);
+			elasticService.updateNote(id);
 		} else {
 			throw new UserException("Note is not presented with given id: " + id);
 		}
@@ -168,11 +174,12 @@ public class NoteServiceImplementation implements NoteService {
 	 */
 	@Transactional
 	@Override
-	public void notePin(long id, String token) {
+	public void notePin(long noteId, String token) {
 		LOG.trace("Inside the Note Service Implemnetation pin..");
-		NoteInformation note = noteRepository.findById(id);
+		NoteInformation note = noteRepository.findById(noteId);
 		note.setPinned(!note.isPinned());
 		noteRepository.save(note);
+		elasticService.updateNote(noteId);
 	}
 
 	/**
@@ -197,6 +204,8 @@ public class NoteServiceImplementation implements NoteService {
 				labels.clear();
 				}
 				noteRepository.deleteNote(id, userid);
+				elasticService.deleteNote(id);
+				LOG.trace("Delete..");
 			} else {
 				throw new UserException("note is not present");
 			}
@@ -224,7 +233,6 @@ public class NoteServiceImplementation implements NoteService {
 			user = repository.getUserById(userId);
 			if (user != null) {
 				System.out.println("user logged in"+user.getUserId());
-				System.out.println("user ");
 				List<NoteInformation> list11 = noteRepository.getNotes(userId);
 			List<NoteInformation> collaboratedNotes=	user.getColaborateNote();
 			if(collaboratedNotes!=null) {
@@ -314,6 +322,7 @@ public class NoteServiceImplementation implements NoteService {
 			NoteInformation note = noteRepository.findById(noteId);
 				note.setColour(colour);
 				noteRepository.save(note);
+			elasticService.updateNote(noteId);
 		} catch (Exception e) {
 			LOG.warn("user is not valid:");
 			throw new UserException("authentication failed");
@@ -341,6 +350,7 @@ public class NoteServiceImplementation implements NoteService {
 			if (note != null) {
 				note.setReminder(reminder.getReminder());
 				noteRepository.save(note);
+				elasticService.updateNote(noteId);
 			} else {
 				LOG.warn("user is not valid:");
 				throw new UserException("note doesn't exist");
@@ -370,6 +380,7 @@ public class NoteServiceImplementation implements NoteService {
 			if (note != null) {
 				note.setReminder(LocalDateTime.now());
 				noteRepository.save(note);
+				elasticService.updateNote(noteId);
 			} else {
 				LOG.warn("user is not valid:");
 				throw new UserException("note doesn't exist");

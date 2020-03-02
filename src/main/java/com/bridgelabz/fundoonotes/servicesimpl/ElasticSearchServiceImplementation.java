@@ -53,6 +53,7 @@ public class ElasticSearchServiceImplementation implements ElasticSearchService 
 			indexResponse = config.client().index(indexrequest, RequestOptions.DEFAULT);
 			return indexResponse.getResult().name();
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
 		}
 		return null;
 
@@ -67,7 +68,10 @@ public class ElasticSearchServiceImplementation implements ElasticSearchService 
 		try {
 			updateResponse = config.client().update(updateRequest, RequestOptions.DEFAULT);
 		} catch (IOException e) {
+			System.out.println(updateResponse);
+			System.out.println(e.getMessage());
 		}
+
 	}
 
 	@Override
@@ -79,6 +83,7 @@ public class ElasticSearchServiceImplementation implements ElasticSearchService 
 			deleteResponse = config.client().delete(deleterequest, RequestOptions.DEFAULT);
 			return deleteResponse.getResult().name();
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
 		}
 		return null;
 	}
@@ -94,6 +99,7 @@ public class ElasticSearchServiceImplementation implements ElasticSearchService 
 			searchresponse = config.client().search(searchrequest, RequestOptions.DEFAULT);
 			return getResult(searchresponse);
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 		}
 		return null;
 
