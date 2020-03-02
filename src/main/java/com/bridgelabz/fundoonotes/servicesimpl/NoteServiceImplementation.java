@@ -57,7 +57,8 @@ public class NoteServiceImplementation implements NoteService {
 	 */
 	@Transactional
 	@Override
-	public void createNote(NoteDto information, String token) {
+	public NoteInformation createNote(NoteDto information, String token) {
+		NoteInformation saveNote;
 		try {
 			LOG.trace("inside NoteServiceImplementation of createNote ");
 			Long userid = (long) tokenGenerator.parseJWT(token);
@@ -67,14 +68,11 @@ public class NoteServiceImplementation implements NoteService {
 			if (user != null) {
 				noteinformation = modelMapper.map(information, NoteInformation.class);
 				noteinformation.setCreatedDateAndTime(LocalDateTime.now());
-				noteinformation.setArchieved(false);
-				noteinformation.setPinned(false);
-				noteinformation.setTrashed(false);
 				noteinformation.setColour("white");
 				user.getNote().add(noteinformation);
-				NoteInformation note = noteRepository.save(noteinformation);
-				if (note != null) {
-					String createNote = elasticService.createNote(note);
+				saveNote = noteRepository.save(noteinformation);
+				if (saveNote != null) {
+					String createNote = elasticService.createNote(saveNote);
 					LOG.info("Create Node" + createNote);
 				}
 
@@ -83,6 +81,7 @@ public class NoteServiceImplementation implements NoteService {
 		}catch (Exception e) {
 			throw new UserException("user is not present with the given id ");
 		}
+		return saveNote;
 
 	}
 
@@ -95,11 +94,13 @@ public class NoteServiceImplementation implements NoteService {
 	 */
 	@Transactional
 	@Override
-	public void updateNote(NoteUpdation information, String token) {
+	public NoteInformation updateNote(NoteUpdation information, String token) {
+		NoteInformation saveInfo;
 		try {
 			LOG.trace("inside NoteServiceImplementation of updateNote ");
 			Long userid = (long) tokenGenerator.parseJWT(token);
 			LOG.info("User Id: "+userid);
+
 			NoteInformation note = noteRepository.findById(information.getId());
 			if (note != null) {
 				LOG.info("Note is " + note);
@@ -110,8 +111,8 @@ public class NoteServiceImplementation implements NoteService {
 				note.setArchieved(information.isArchieved());
 				note.setArchieved(information.isTrashed());
 				note.setUpDateAndTime(LocalDateTime.now());
-				NoteInformation save = noteRepository.save(note);
-				if (save != null) {
+				saveInfo = noteRepository.save(note);
+				if (saveInfo != null) {
 					elasticService.updateNote(information.getId());
 					LOG.trace("Note Update in elastic..");
 				}
@@ -122,6 +123,7 @@ public class NoteServiceImplementation implements NoteService {
 		} catch (Exception e) {
 			throw new UserException("User is not present");
 		}
+		return saveInfo;
 	}
 
 	/**
@@ -134,13 +136,24 @@ public class NoteServiceImplementation implements NoteService {
 
 	@Transactional
 	@Override
-	public void deleteNote(long id, String token) {
+	public void deleteNote(long noteId, String token) {
 		LOG.trace("inside NoteServiceImplementation of deleteNote ");
-		NoteInformation note = noteRepository.findById(id);
-		note.setTrashed(!note.isTrashed());
-		noteRepository.save(note);
-		elasticService.updateNote(id);
-
+		try {
+			LOG.trace("inside NoteServiceImplementation of updateNote ");
+			Long userid = (long) tokenGenerator.parseJWT(token);
+			LOG.info("User Id: "+userid);
+			NoteInformation note = noteRepository.findById(noteId);
+			if (note != null) {
+				note.setTrashed(!note.isTrashed());
+				noteRepository.save(note);
+				elasticService.updateNote(noteId);
+			}
+			else {
+				throw new Exception("Note is note present");
+			}
+		}catch(Exception e){
+			LOG.warn("User Note Found with this user token.." + token);
+		}
 	}
 
 	/**
@@ -152,17 +165,26 @@ public class NoteServiceImplementation implements NoteService {
 
 	@Transactional
 	@Override
-	public void archievNote(long id, String token) {
+	public NoteInformation archievNote(long noteId, String token) {
 		LOG.trace("inside NoteServiceImplementation of archieveNote ");
-		LOG.info("Id of the archive is: " + id);
-		NoteInformation note = noteRepository.findById(id);
+		NoteInformation arInformation;
+		try {
+			LOG.trace("inside NoteServiceImplementation of archievNote ");
+			Long userid = (long) tokenGenerator.parseJWT(token);
+			LOG.info("User Id: " + userid);
+		} catch (Exception e) {
+			throw new UserException("user is not present");
+		}
+		LOG.info("Id of the archive is: " + noteId);
+		NoteInformation note = noteRepository.findById(noteId);
 		if (note != null) {
 		note.setArchieved(!note.isArchieved());
-		noteRepository.save(note);
-			elasticService.updateNote(id);
+			arInformation = noteRepository.save(note);
+			elasticService.updateNote(noteId);
 		} else {
-			throw new UserException("Note is not presented with given id: " + id);
+			throw new UserException("Note is not presented with given id: " + noteId);
 		}
+		return arInformation;
 	}
 
 	/**
@@ -174,12 +196,24 @@ public class NoteServiceImplementation implements NoteService {
 	 */
 	@Transactional
 	@Override
-	public void notePin(long noteId, String token) {
-		LOG.trace("Inside the Note Service Implemnetation pin..");
+	public NoteInformation notePin(long noteId, String token) {
+		NoteInformation notePinInfo;
+		try {
+			LOG.trace("Inside the Note Service Implemnetation pin..");
+			Long userid = (long) tokenGenerator.parseJWT(token);
+			LOG.info("User Id: " + userid);
+		} catch (Exception e) {
+			throw new UserException("User is not present");
+		}
 		NoteInformation note = noteRepository.findById(noteId);
+		if (note != null) {
 		note.setPinned(!note.isPinned());
-		noteRepository.save(note);
+			notePinInfo = noteRepository.save(note);
 		elasticService.updateNote(noteId);
+		} else {
+			throw new UserException("Note is note present with given Note id in this user" + noteId + note);
+		}
+		return notePinInfo;
 	}
 
 	/**
@@ -192,19 +226,19 @@ public class NoteServiceImplementation implements NoteService {
 
 	@Transactional
 	@Override
-	public boolean deleteNotePemenetly(long id, String token) {
+	public boolean deleteNotePemenetly(long noteId, String token) {
 		LOG.trace("Inside the Note Service deleteNotePemenetly ..");
 		try {
 			Long userid = (long) tokenGenerator.parseJWT(token);
 			LOG.trace("user id" + " " + userid);
-			NoteInformation note = noteRepository.findById(id);
+			NoteInformation note = noteRepository.findById(noteId);
 			if (note != null) {
 				List<LabelInformation> labels = note.getList();
 				if(labels!=null) {
 				labels.clear();
 				}
-				noteRepository.deleteNote(id, userid);
-				elasticService.deleteNote(id);
+				noteRepository.deleteNote(noteId, userid);
+				elasticService.deleteNote(noteId);
 				LOG.trace("Delete..");
 			} else {
 				throw new UserException("note is not present");
@@ -313,20 +347,22 @@ public class NoteServiceImplementation implements NoteService {
 
 	@Transactional
 	@Override
-	public void addColour(Long noteId, String token, String colour) {
+	public NoteInformation addColour(Long noteId, String token, String colour) {
 		LOG.trace("Inside the Note Service addColour ..");
+		NoteInformation noteInfoColour;
 		Long userid;
 		try {
 			userid = (long) tokenGenerator.parseJWT(token);
 			LOG.info("user id" + " " + userid);
 			NoteInformation note = noteRepository.findById(noteId);
 				note.setColour(colour);
-				noteRepository.save(note);
+			noteInfoColour = noteRepository.save(note);
 			elasticService.updateNote(noteId);
 		} catch (Exception e) {
 			LOG.warn("user is not valid:");
 			throw new UserException("authentication failed");
 		}
+		return noteInfoColour;
 	}
 
 	/**
@@ -340,16 +376,17 @@ public class NoteServiceImplementation implements NoteService {
 
 	@Transactional
 	@Override
-	public void addReminder(Long noteId, String token, ReminderDto reminder) {
+	public NoteInformation addReminder(Long noteId, String token, ReminderDto reminder) {
 		LOG.trace("Inside the Note Service addReminder ..");
 		Long userid;
+		NoteInformation noteInfoRemainder;
 		try {
 			userid = (long) tokenGenerator.parseJWT(token);
 			LOG.info("user id" + " " + userid);
 			NoteInformation note = noteRepository.findById(noteId);
 			if (note != null) {
 				note.setReminder(reminder.getReminder());
-				noteRepository.save(note);
+				noteInfoRemainder = noteRepository.save(note);
 				elasticService.updateNote(noteId);
 			} else {
 				LOG.warn("user is not valid:");
@@ -359,6 +396,7 @@ public class NoteServiceImplementation implements NoteService {
 			LOG.warn("user is not valid:");
 			throw new UserException("authentication failed");
 		}
+		return noteInfoRemainder;
 	}
 
 	/**
@@ -370,16 +408,17 @@ public class NoteServiceImplementation implements NoteService {
 	 * @return nothing
 	 */
 	@Override
-	public void removeReminder(Long noteId, String token, ReminderDto reminder) {
+	public NoteInformation removeReminder(Long noteId, String token, ReminderDto reminder) {
 		LOG.trace("Inside the Note Service removeReminder ..");
 		Long userid;
+		NoteInformation noteInformation;
 		try {
 			userid = (long) tokenGenerator.parseJWT(token);
 			LOG.info("user id" + " " + userid);
 			NoteInformation note = noteRepository.findById(noteId);
 			if (note != null) {
 				note.setReminder(LocalDateTime.now());
-				noteRepository.save(note);
+				noteInformation = noteRepository.save(note);
 				elasticService.updateNote(noteId);
 			} else {
 				LOG.warn("user is not valid:");
@@ -389,6 +428,7 @@ public class NoteServiceImplementation implements NoteService {
 			LOG.warn("user is not valid:");
 			throw new UserException("authentication failed");
 		}
+		return noteInformation;
 	}
 
 	/**

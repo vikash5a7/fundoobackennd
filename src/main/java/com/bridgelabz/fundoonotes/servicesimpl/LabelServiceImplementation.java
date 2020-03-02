@@ -114,7 +114,6 @@ public class LabelServiceImplementation implements LabelService {
 		} else {
 			throw new UserException("Note does not exist with the given id");
 		}
-
 	}
 
 	/**
@@ -129,9 +128,18 @@ public class LabelServiceImplementation implements LabelService {
 	@Override
 	public void addLabel(Long labelId, Long noteId, String token) {
 		NoteInformation note = noteRepository.findById(noteId);
+		Long id = null;
+		try {
+			id = (long) tokenGenerator.parseJWT(token);
+		} catch (Exception e) {
+			throw new UserException("user is not present ");
+		}
+		UserInformation user = userRepository.getUserById(id);
+		if (user != null) {
 		LabelInformation label = repository.fetchLabelById(labelId);
 		label.getList().add(note);
 		repository.save(label);
+		}
 	}
 
 	/**
@@ -145,15 +153,27 @@ public class LabelServiceImplementation implements LabelService {
 	@Transactional
 	@Override
 	public void removeLabel(Long labelId, Long noteId, String token) {
-		NoteInformation note = noteRepository.findById(noteId);
-		LabelInformation label = repository.fetchLabelById(labelId);
-		note.getList().remove(label);
-		noteRepository.save(note);
+		Long id = null;
+		try {
+			id = (long) tokenGenerator.parseJWT(token);
+		} catch (Exception e) {
+			throw new UserException("user is not present ");
+		}
+		UserInformation user = userRepository.getUserById(id);
+		if (user != null) {
+			NoteInformation note = noteRepository.findById(noteId);
+			LabelInformation label = repository.fetchLabelById(labelId);
+			boolean remove = note.getList().remove(label);
+			if (remove) {
+				noteRepository.save(note);
+			}
+		}
+
 	}
 
 	/**
 	 * edit label
-	 * 
+	 *
 	 * @param label
 	 * @param token
 	 */
@@ -219,15 +239,12 @@ public class LabelServiceImplementation implements LabelService {
 
 	@Override
 	public List<LabelInformation> getLabel(String token) {
-
 		Long id;
 		try {
 			id = (long) tokenGenerator.parseJWT(token);
 		} catch (Exception e) {
-
 			throw new UserException("note does not exist");
 		}
-
 		List<LabelInformation> labels = repository.getAllLabel(id);
 		return labels;
 
@@ -241,10 +258,19 @@ public class LabelServiceImplementation implements LabelService {
 	 */
 	@Override
 	public List<NoteInformation> getAllNotes(String token, Long labelId) {
+		Long id;
+		List<NoteInformation> list = null;
+		try {
+			id = (long) tokenGenerator.parseJWT(token);
+		} catch (Exception e) {
+			throw new UserException("user is not present ");
+		}
+		UserInformation user = userRepository.getUserById(id);
+		if (user != null) {
 		LabelInformation label=repository.getLabel(labelId);
-		List<NoteInformation> list=label.getList();
+			list = label.getList();
 		System.out.println("label is"+list);
-
+		}
 		return list;
 	}
 

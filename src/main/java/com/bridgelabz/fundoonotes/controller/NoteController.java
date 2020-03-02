@@ -34,6 +34,7 @@ public class NoteController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(NoteController.class);
 
+	@SuppressWarnings("unused")
 	@Autowired
 	private UserServices uservice;
 
@@ -52,16 +53,12 @@ public class NoteController {
 	@PostMapping("/note/create")
 	public ResponseEntity<Response> createNote(@RequestBody NoteDto information, @RequestHeader String token)
 			throws Exception {
-		LOG.trace("Inside The node Creation...");
-		boolean isVerify = uservice.verify(token);
-		if (isVerify) {
-			LOG.info("verification Done");
-			LOG.info("Created Node name" + information.getDescription());
-			service.createNote(information, token);
-			return ResponseEntity.status(HttpStatus.CREATED).body(new Response("note created", 200, information));
+		NoteInformation createNote = service.createNote(information, token);
+		if (createNote != null) {
+			LOG.info("Created Node Details" + information.getDescription());
+			return ResponseEntity.status(HttpStatus.CREATED).body(new Response("note created", 200, createNote));
 		} else {
-			LOG.info("Note verified user...");
-			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new Response("not verified user", 400));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("not verified user", 400));
 		}
 	}
 
@@ -78,8 +75,12 @@ public class NoteController {
 	public ResponseEntity<Response> update(@RequestBody NoteUpdation note, @RequestHeader("token") String token)
 			throws Exception {
 		LOG.trace("inside update controller.... and id is of node " + note.getId());
-		service.updateNote(note, token);
-		return ResponseEntity.status(HttpStatus.OK).body(new Response("note updated", 200));
+		NoteInformation updateNote = service.updateNote(note, token);
+		if (updateNote != null) {
+			return ResponseEntity.status(HttpStatus.OK).body(new Response("Note updated", 200, updateNote));
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Note is not updated", 400));
+		}
 	}
 
 	/**
@@ -93,9 +94,13 @@ public class NoteController {
 	public ResponseEntity<Response> archieve(@PathVariable long id, @RequestHeader("token") String token) {
 
 		LOG.trace("inside delete controller" + id);
-		service.archievNote(id, token);
-		return ResponseEntity.status(HttpStatus.OK).body(new Response("note archieved", 200));
-
+		NoteInformation archievNote = service.archievNote(id, token);
+		if (archievNote != null) {
+			return ResponseEntity.status(HttpStatus.OK)
+					.body(new Response("Note updated", 200, archievNote.isArchieved()));
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Note is not updated", 400));
+		}
 	}
 
 	/**
@@ -109,8 +114,12 @@ public class NoteController {
 	@PostMapping("/note/pin/{id}")
 	public ResponseEntity<Response> notePining(@PathVariable long id, @RequestHeader("token") String token) {
 		LOG.trace("Inside the notePin and id is: " + id);
-		service.notePin(id, token);
-		return ResponseEntity.status(HttpStatus.OK).body(new Response("Note pinned", 200));
+		NoteInformation notePin = service.notePin(id, token);
+		if (notePin != null) {
+			return ResponseEntity.status(HttpStatus.OK).body(new Response("Note updated", 200, notePin.isPinned()));
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Note is not updated", 400));
+		}
 	}
 
 	/**
@@ -140,8 +149,12 @@ public class NoteController {
 	@DeleteMapping("/note/deletePermanently/{id}")
 	public ResponseEntity<Response> deletePermenently(@PathVariable long id, @RequestHeader("token") String token) {
 		LOG.trace("inside delete controller" + id);
-		service.deleteNotePemenetly(id, token);
-		return ResponseEntity.status(HttpStatus.OK).body(new Response("note deleted permanently", 200));
+		boolean deleteNotePemenetly = service.deleteNotePemenetly(id, token);
+		if (deleteNotePemenetly) {
+			return ResponseEntity.status(HttpStatus.OK).body(new Response("Note updated", 200, deleteNotePemenetly));
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Note is not Delete", 400));
+		}
 	}
 
 	/**
@@ -155,7 +168,10 @@ public class NoteController {
 	public ResponseEntity<Response> getAllNotes(@RequestHeader("token") String token) {
 		LOG.trace("inside delete controller");
 		List<NoteInformation> notes = service.getAllNotes(token);
-		return ResponseEntity.status(HttpStatus.OK).body(new Response("The notes are", 200, notes));
+		if (notes != null)
+			return ResponseEntity.status(HttpStatus.OK).body(new Response("The notes are", 200, notes));
+		else
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response("Not found", 404));
 	}
 
 	/**
@@ -196,8 +212,11 @@ public class NoteController {
 	public ResponseEntity<Response> getPinnedNote(@RequestHeader("token") String token) {
 		LOG.trace("inside getArchiveNote controller");
 		List<NoteInformation> notes = service.getAllPinnedNotes(token);
-
-		return ResponseEntity.status(HttpStatus.OK).body(new Response("The pinned notes are", 200, notes));
+		if (notes != null) {
+			return ResponseEntity.status(HttpStatus.OK).body(new Response("The pinned notes are", 200, notes));
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Not found", 404));
+		}
 
 	}
 
@@ -212,9 +231,12 @@ public class NoteController {
 	@PostMapping("/note/addColour")
 	public ResponseEntity<Response> addColour(@RequestParam("noteId") Long noteId,
 			@RequestParam("colour") String colour, @RequestHeader("token") String token) {
-		service.addColour(noteId, token, colour);
-		return ResponseEntity.status(HttpStatus.CREATED).body(new Response("colour added", 200, colour));
-
+		NoteInformation addColour = service.addColour(noteId, token, colour);
+		if(addColour!=null)
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(new Response("colour added", 200, addColour.getColour()));
+		else
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Not saved", 400));
 	}
 
 	/**
@@ -230,9 +252,14 @@ public class NoteController {
 	public ResponseEntity<Response> addReminder(@RequestParam("noteId") Long noteId,
 			@RequestHeader("token") String token, @RequestBody ReminderDto reminder) {
 		LOG.trace("inside addReminder controller");
-		service.addReminder(noteId, token, reminder);
-		return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Reminder added", 200, reminder));
+		NoteInformation addReminderInfo = service.addReminder(noteId, token, reminder);
+		if (addReminderInfo != null) {
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(new Response("Reminder added", 200, reminder.getReminder()));
 
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Not added", 400));
+		}
 	}
 
 	/**
@@ -263,9 +290,13 @@ public class NoteController {
 	public ResponseEntity<Response> search(@RequestParam("title") String title, @RequestHeader("token") String token) {
 		LOG.trace("inside search controller");
 		List<NoteInformation> notes = service.searchNotesByTitle(title, token);
+		if (notes != null) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new Response("The note you are looking for is", 200, notes));
-
+		}
+		else {
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(new Response("Couldn't get note with given title", 404, title));
+		}
 	}
-
 }

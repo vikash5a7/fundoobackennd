@@ -9,9 +9,9 @@ import com.bridgelabz.fundoonotes.request.ReminderDto;
 
 public interface NoteService {
 
-	void createNote(NoteDto information, String token);
+	NoteInformation createNote(NoteDto information, String token);
 
-	void updateNote(NoteUpdation information, String token);
+	NoteInformation updateNote(NoteUpdation information, String token);
 
 	void deleteNote(long id, String token);
 
@@ -21,17 +21,17 @@ public interface NoteService {
 
 	boolean deleteNotePemenetly(long id, String token);
 
-	void archievNote(long id, String token);
+	NoteInformation archievNote(long id, String token);
 
 	List<NoteInformation> getArchiveNote(String token);
 
-	void addColour(Long noteId, String token, String colour);
+	NoteInformation addColour(Long noteId, String token, String colour);
 
-	void addReminder(Long noteId,String token,ReminderDto reminder);
+	NoteInformation addReminder(Long noteId, String token, ReminderDto reminder);
 
-	void removeReminder(Long noteId,String token,ReminderDto reminder);
+	NoteInformation removeReminder(Long noteId, String token, ReminderDto reminder);
 
-	void notePin(long id, String token);
+	NoteInformation notePin(long id, String token);
 
 	List<NoteInformation> searchByTitle(String title, String token);
 
