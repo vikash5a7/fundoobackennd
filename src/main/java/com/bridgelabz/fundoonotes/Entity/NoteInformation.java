@@ -16,7 +16,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 
 import lombok.Data;
 
-@Document(indexName = "elasticsearch", type = "model", shards = 2)
+@Document(indexName = "elasticsearch", shards = 2)
 @Entity
 @Data
 public class NoteInformation {

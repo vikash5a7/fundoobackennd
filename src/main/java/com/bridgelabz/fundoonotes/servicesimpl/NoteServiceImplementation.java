@@ -17,6 +17,7 @@ import com.bridgelabz.fundoonotes.Entity.NoteInformation;
 import com.bridgelabz.fundoonotes.Entity.UserInformation;
 import com.bridgelabz.fundoonotes.dto.NoteDto;
 import com.bridgelabz.fundoonotes.exception.UserException;
+import com.bridgelabz.fundoonotes.redishrepo.RedisRepositary;
 import com.bridgelabz.fundoonotes.repository.IUserRepository;
 import com.bridgelabz.fundoonotes.repositoryimpl.NoteRepository;
 import com.bridgelabz.fundoonotes.request.NoteUpdation;
@@ -43,6 +44,8 @@ public class NoteServiceImplementation implements NoteService {
 	private NoteRepository noteRepository;
 
 	private NoteInformation noteinformation = new NoteInformation();
+	@Autowired
+	private RedisRepositary redisRepo;
 
 
 	@Autowired
@@ -71,18 +74,23 @@ public class NoteServiceImplementation implements NoteService {
 				noteinformation.setColour("white");
 				user.getNote().add(noteinformation);
 				saveNote = noteRepository.save(noteinformation);
+//
+//				if (saveNote != null) {
+//					redisRepo.addItem(noteinformation);
+//					System.out.println("inserted");
+//				} else {
+//					System.out.println("Something went wrong");
+//				}
 				if (saveNote != null) {
 					String createNote = elasticService.createNote(saveNote);
 					LOG.info("Create Node" + createNote);
 				}
-
 			} else {
 				throw new UserException("note is not present with the given id ");}
 		}catch (Exception e) {
 			throw new UserException("user is not present with the given id ");
 		}
 		return saveNote;
-
 	}
 
 	/**

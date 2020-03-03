@@ -1,6 +1,7 @@
 package com.bridgelabz.fundoonotes.servicesimpl;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -62,8 +63,8 @@ public class LabelServiceImplementation implements LabelService {
 
 		UserInformation user = userRepository.getUserById(id);
 		if (user != null) {
-			LabelInformation labelInfo = repository.fetchLabel(user.getUserId(), label.getName());
-			if (labelInfo == null) {
+			Optional<LabelInformation> labelInfo = repository.fetchLabel(user.getUserId(), label.getName());
+			if (labelInfo.isPresent()) {
 				labelInformation=modelMapper.map(label, LabelInformation.class);
 				labelInformation.getLabelId();
 				labelInformation.getName();
@@ -89,25 +90,22 @@ public class LabelServiceImplementation implements LabelService {
 	@Override
 	public void createLabelAndMap(LabelDto label, String token,Long noteId) {
 		Long id = null;
-
 		try {
 			id = (long) tokenGenerator.parseJWT(token);
 		} catch (Exception e) {
 
 			throw new UserException("user does not exist");
 		}
-
 		UserInformation user = userRepository.getUserById(id);
 		if (user != null) {
-			LabelInformation labelInfo = repository.fetchLabel(user.getUserId(), label.getName());
-			if (labelInfo == null) {
+			Optional<LabelInformation> labelInfo = repository.fetchLabel(user.getUserId(), label.getName());
+			if (labelInfo.isPresent()) {
 				BeanUtils.copyProperties(label, LabelInformation.class);
 				labelInformation.setUserId(user.getUserId());
 				repository.save(labelInformation);
 				NoteInformation note=noteRepository.findById(noteId);
 				note.getList().add(labelInformation);
 				noteRepository.save(note);
-
 			} else {
 				throw new UserException("label with the given name is already present");
 			}
@@ -136,7 +134,7 @@ public class LabelServiceImplementation implements LabelService {
 		}
 		UserInformation user = userRepository.getUserById(id);
 		if (user != null) {
-		LabelInformation label = repository.fetchLabelById(labelId);
+			LabelInformation label = repository.fetchLabelById(labelId);
 		label.getList().add(note);
 		repository.save(label);
 		}
@@ -267,7 +265,7 @@ public class LabelServiceImplementation implements LabelService {
 		}
 		UserInformation user = userRepository.getUserById(id);
 		if (user != null) {
-		LabelInformation label=repository.getLabel(labelId);
+			LabelInformation label = repository.getLabel(labelId);
 			list = label.getList();
 		System.out.println("label is"+list);
 		}

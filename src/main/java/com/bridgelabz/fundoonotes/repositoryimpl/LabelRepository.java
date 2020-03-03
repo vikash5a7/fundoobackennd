@@ -1,6 +1,7 @@
 package com.bridgelabz.fundoonotes.repositoryimpl;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
@@ -37,14 +38,14 @@ public class LabelRepository implements ILabelRepository {
 
 
 	@Override
-	public LabelInformation fetchLabel(Long userid, String labelname) {
+	public Optional<LabelInformation> fetchLabel(Long userid, String labelname) {
 
 		Session session = entityManager.unwrap(Session.class);
 		@SuppressWarnings("rawtypes")
 		Query q = session.createQuery("from LabelInformation where user_id=:id and name=:name");
 		q.setParameter("id", userid);
 		q.setParameter("name", labelname);
-		return (LabelInformation) q.uniqueResult();
+		return (Optional<LabelInformation>) q.uniqueResult();
 
 	}
 
