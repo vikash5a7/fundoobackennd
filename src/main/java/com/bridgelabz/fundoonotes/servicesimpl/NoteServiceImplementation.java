@@ -472,6 +472,17 @@ public class NoteServiceImplementation implements NoteService {
 
 	}
 
+	@Override
+	public NoteInformation getSingleNoteById(long noteId) {
+		NoteInformation note = elasticService.findById(noteId);
+		if (note != null) {
+			return note;
+		} else {
+			throw new UserException("Note not found");
+		}
+
+	}
+
 	/**
 	 * Searching notes Based on there title
 	 *
@@ -519,4 +530,5 @@ public class NoteServiceImplementation implements NoteService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

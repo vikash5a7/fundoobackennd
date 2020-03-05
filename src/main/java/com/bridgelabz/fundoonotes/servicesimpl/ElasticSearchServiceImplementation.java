@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -23,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.bridgelabz.fundoonotes.Entity.NoteInformation;
 import com.bridgelabz.fundoonotes.configurations.ElasticSearchConfig;
-import com.bridgelabz.fundoonotes.repositoryimpl.NoteRepository;
+import com.bridgelabz.fundoonotes.exception.UserException;
 import com.bridgelabz.fundoonotes.services.ElasticSearchService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,10 +34,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ElasticSearchServiceImplementation implements ElasticSearchService {
 
 	@Autowired
-	private NoteRepository noteRepository;
+	private ElasticSearchConfig config;
 
 	@Autowired
-	private ElasticSearchConfig config;
+	private ElasticSearchService elasticService;
 
 	@Autowired
 	private ObjectMapper objectmapper;
@@ -56,12 +58,31 @@ public class ElasticSearchServiceImplementation implements ElasticSearchService 
 			System.out.println(e.getMessage());
 		}
 		return null;
+	}
 
+	@Override
+	public NoteInformation findById(Long id) {
+		System.out.println("note Id is :" + id);
+		GetRequest getRequest = new GetRequest(INDEX, TYPE, String.valueOf(id));
+		GetResponse getResponse = null;
+		try {
+			getResponse = config.client().get(getRequest, RequestOptions.DEFAULT);
+			System.out.println("note Id is :" + getResponse);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Map<String, Object> resultMap = getResponse.getSource();
+		return objectmapper.convertValue(resultMap, NoteInformation.class);
 	}
 
 	@Override
 	public void updateNote(Long noteId) {
-		NoteInformation note = noteRepository.findById(noteId);
+		NoteInformation note = null;
+		try {
+			note = elasticService.findById(noteId);
+		} catch (Exception e1) {
+			throw new UserException("Note is not found with given id" + noteId);
+		}
 		Map<String, Object> notemapper = objectmapper.convertValue(note, Map.class);
 		UpdateRequest updateRequest = new UpdateRequest(INDEX, TYPE, String.valueOf(note.getId())).doc(notemapper);
 		UpdateResponse updateResponse = null;
@@ -76,7 +97,12 @@ public class ElasticSearchServiceImplementation implements ElasticSearchService 
 
 	@Override
 	public String deleteNote(Long noteId) {
-		NoteInformation note = noteRepository.findById(noteId);
+		NoteInformation note = null;
+		try {
+			note = elasticService.findById(noteId);
+		} catch (Exception e1) {
+			throw new UserException("Note is not found with given id" + noteId);
+		}
 		DeleteRequest deleterequest = new DeleteRequest(INDEX, TYPE, String.valueOf(note.getId()));
 		DeleteResponse deleteResponse = null;
 		try {
@@ -114,5 +140,7 @@ public class ElasticSearchServiceImplementation implements ElasticSearchService 
 		}
 		return notes;
 	}
+
+
 
 }

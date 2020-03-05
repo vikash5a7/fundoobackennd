@@ -38,4 +38,6 @@ public interface NoteService {
 	List<NoteInformation> getAllPinnedNotes(String token);
 
 	List<NoteInformation> searchNotesByTitle(String token, String title);
+
+	NoteInformation getSingleNoteById(long noteId);
 }

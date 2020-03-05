@@ -124,6 +124,14 @@ public class NoteController {
 		}
 	}
 
+	@DeleteMapping("/note/delete/{id}")
+	public ResponseEntity<Response> delete(@PathVariable long id, @RequestHeader("token") String token) {
+		LOG.trace("Inside the delete notes id: " + id);
+		service.deleteNote(id, token);
+		return ResponseEntity.status(HttpStatus.OK).body(new Response("note deleted", 200));
+
+	}
+
 	/**
 	 * Deleting Node....
 	 *
@@ -132,11 +140,11 @@ public class NoteController {
 	 * @return response
 	 */
 
-	@DeleteMapping("/note/delete/{id}")
-	public ResponseEntity<Response> delete(@PathVariable long id, @RequestHeader("token") String token) {
-		LOG.trace("Inside the delete notes id: " + id);
-		service.deleteNote(id, token);
-		return ResponseEntity.status(HttpStatus.OK).body(new Response("note deleted", 200));
+	@GetMapping("/note/getsinglenote/{id}")
+	public ResponseEntity<Response> getSingleNotes(@PathVariable long noteId, @RequestHeader("token") String token) {
+		LOG.trace("Inside the delete notes id: " + noteId);
+		NoteInformation note = service.getSingleNoteById(noteId);
+		return ResponseEntity.status(HttpStatus.OK).body(new Response("note deleted", 200, note));
 
 	}
 

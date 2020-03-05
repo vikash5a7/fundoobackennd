@@ -12,11 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 
-import org.springframework.data.elasticsearch.annotations.Document;
-
 import lombok.Data;
 
-@Document(indexName = "elasticsearch", shards = 2)
 @Entity
 @Data
 public class NoteInformation {
