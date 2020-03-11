@@ -107,7 +107,6 @@ public class UserServiceImplementation implements UserServices {
 		UserInformation user = repository.getUser(information.getEmail());
 		LOG.info("user info.. " + user);
 		if (user != null) {
-
 			if ((user.isVerified() == true) && encryption.matches(information.getPassword(), user.getPassword())) {
 				System.out.println(generate.jwtToken(user.getUserId()));
 				return user;
@@ -115,7 +114,7 @@ public class UserServiceImplementation implements UserServices {
 				String mailResponse = response.formMessage("http://localhost:8080/verify",
 						generate.jwtToken(user.getUserId()));
 				MailServiceProvider.sendEmail(information.getEmail(), "verification", mailResponse);
-				return null;
+				throw new UserException("please verify email id ");
 			}
 		} else {
 			return null;

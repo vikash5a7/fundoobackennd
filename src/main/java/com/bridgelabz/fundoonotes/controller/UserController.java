@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.fundoonotes.Entity.UserInformation;
 import com.bridgelabz.fundoonotes.dto.UserDto;
+import com.bridgelabz.fundoonotes.exception.UserException;
 import com.bridgelabz.fundoonotes.request.LoginInformation;
 import com.bridgelabz.fundoonotes.request.PasswordUpdate;
 import com.bridgelabz.fundoonotes.responses.Response;
@@ -52,7 +52,6 @@ public class UserController {
 	 */
 
 	@PostMapping("/user/registration")
-	@CachePut(value="user", key="#token")
 	@ResponseBody
 	public ResponseEntity<Response> registration(@RequestBody UserDto information) {
 		LOG.trace("Registration Started......");
@@ -66,7 +65,7 @@ public class UserController {
 			LOG.info("User not registred already exit...");
 
 			return ResponseEntity.status(HttpStatus.ALREADY_REPORTED)
-					.body(new Response("user already exist", 400, information));
+					.body(new Response("User Already Exist", 400, information));
 		}
 
 	}
@@ -86,12 +85,10 @@ public class UserController {
 			String token=generate.jwtToken(userInformation.getUserId());
 			return ResponseEntity.status(HttpStatus.ACCEPTED).header("login successfull", information.getEmail())
 					.body(new UsersDetailRes(token, 200, information));
-
-		} else {
-
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new UsersDetailRes("Login failed Occured", 400, information));
 		}
-
+		else {
+			throw new UserException(" Invalide credentials");
+		}
 	}
 	/**
 	 * This is for the user verify.......
@@ -101,7 +98,6 @@ public class UserController {
 	 */
 
 	@GetMapping("/user/verify/{token}")
-
 	public ResponseEntity<Response> userVerification(@PathVariable("token") String token) throws Exception {
 		LOG.trace("Verifying the user based on there valid token....");
 		LOG.info("token for verification" + token);
@@ -112,7 +108,6 @@ public class UserController {
 		} else {
 			LOG.info("verification Not Done");
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(new Response("not verified", 400));
-
 		}
 	}
 	/**

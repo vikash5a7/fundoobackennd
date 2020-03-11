@@ -24,7 +24,8 @@ public class UserInformation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long userId;
-	private String name;
+	private String fname;
+	private String lname;
 	private String email;
 	private String password;
 	private Long mobileNumber;
