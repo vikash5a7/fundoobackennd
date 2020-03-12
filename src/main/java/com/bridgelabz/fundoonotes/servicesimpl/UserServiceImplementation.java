@@ -107,17 +107,21 @@ public class UserServiceImplementation implements UserServices {
 		UserInformation user = repository.getUser(information.getEmail());
 		LOG.info("user info.. " + user);
 		if (user != null) {
-			if ((user.isVerified() == true) && encryption.matches(information.getPassword(), user.getPassword())) {
+			if ((user.isVerified() == true)) {
+				if (encryption.matches(information.getPassword(), user.getPassword())) {
 				System.out.println(generate.jwtToken(user.getUserId()));
 				return user;
+				} else {
+					throw new UserException("Invalid password");
+				}
 			} else {
-				String mailResponse = response.formMessage("http://localhost:8080/verify",
+				String mailResponse = response.formMessage("http://localhost:8080/user/verify",
 						generate.jwtToken(user.getUserId()));
 				MailServiceProvider.sendEmail(information.getEmail(), "verification", mailResponse);
-				throw new UserException("please verify email id ");
+				throw new UserException("Please verify Your email id");
 			}
 		} else {
-			return null;
+			throw new UserException("User Not present enter valid your email id");
 		}
 	}
 
@@ -131,19 +135,26 @@ public class UserServiceImplementation implements UserServices {
 	@Override
 	public boolean update(PasswordUpdate information, String token) {
 		LOG.trace("Inside Password Service");
+		LOG.info("user Deatils are" + information);
 		if (information.getNewPassword().equals(information.getConfirmPassword())) {
-
+			LOG.trace("Password Matches..");
 			Long id = null;
 			try {
 				LOG.info("in update method" + "   " + generate.parseJWT(token));
 				id = (long) generate.parseJWT(token);
-				String epassword = encryption.encode(information.getConfirmPassword());
-				information.setConfirmPassword(epassword);
-				return repository.upDate(information, id);
+				UserInformation UpdateUser = repository.getUser(information.getEmail());
+				if (id == UpdateUser.getUserId()) {
+					String epassword = encryption.encode(information.getConfirmPassword());
+					information.setConfirmPassword(epassword);
+					return repository.upDate(information, id);
+				} else {
+					throw new UserException("Please Enter valid Email ");
+				}
 			} catch (Exception e) {
 				throw new UserException("invalid credentials");}
 		}
 		else {
+			System.out.println("Password Not match");
 			throw new UserException("invalid password");
 		}
 	}
@@ -189,7 +200,7 @@ public class UserServiceImplementation implements UserServices {
 		try {
 			UserInformation user = repository.getUser(email);
 			if (user.isVerified() == true) {
-				String mailResponse = response.formMessage("http://localhost:8080/updatePassword",
+				String mailResponse = response.formMessage("http://localhost:4200/update-password",
 						generate.jwtToken(user.getUserId()));
 				MailServiceProvider.sendEmail(user.getEmail(), "verification", mailResponse);
 				return true;

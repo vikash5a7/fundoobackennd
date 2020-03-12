@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +23,7 @@ import com.bridgelabz.fundoonotes.Entity.UserInformation;
 import com.bridgelabz.fundoonotes.dto.UserDto;
 import com.bridgelabz.fundoonotes.exception.UserException;
 import com.bridgelabz.fundoonotes.request.LoginInformation;
+import com.bridgelabz.fundoonotes.request.PasswordReset;
 import com.bridgelabz.fundoonotes.request.PasswordUpdate;
 import com.bridgelabz.fundoonotes.responses.Response;
 import com.bridgelabz.fundoonotes.responses.UsersDetailRes;
@@ -117,10 +117,10 @@ public class UserController {
 	 */
 
 	@PostMapping("user/forgotpassword")
-	public ResponseEntity<Response> forgogPassword(@RequestParam("email") String email) {
-		LOG.info("email: "+email);
+	public ResponseEntity<Response> forgogPassword(@RequestBody PasswordReset passwordReset) {
+		LOG.info("email: " + passwordReset.getEmail());
 		LOG.trace("forget password...");
-		boolean result = service.isUserExist(email);
+		boolean result = service.isUserExist(passwordReset.getEmail());
 		if (result) {
 			LOG.trace("User exit....");
 
